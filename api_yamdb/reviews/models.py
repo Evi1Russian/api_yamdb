@@ -30,7 +30,21 @@ class User(AbstractUser):
         default='user',
         verbose_name='Роль'
     )
-    
+    bio = models.TextField(
+        blank=True,
+        verbose_name='Биография'
+    )
+    first_name = models.CharField(
+        'имя',
+        max_length=150,
+        blank=True
+    )
+    last_name = models.CharField(
+        'фамилия',
+        max_length=150,
+        blank=True
+    )
+
     @property
     def is_user(self):
         return self.role == 'user'
