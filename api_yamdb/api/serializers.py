@@ -19,3 +19,18 @@ class NotAdminSerializer(serializers.ModelSerializer):
                   'first_name', 'last_name'
                   )
         read_only_fields = ('role',)
+
+
+class SignupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email',)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value
+    
