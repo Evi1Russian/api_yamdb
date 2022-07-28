@@ -34,6 +34,6 @@ class TitleSerializer(serializers.ModelSerializer):
             genres = validated_data.pop('genre')
             title = Title.objects.create(**validated_data)
             for genre in genres:
-                title = Genre.objects.get_or_create(
+                genre = Genre.objects.get_or_create(
                     **genre)
             return title
