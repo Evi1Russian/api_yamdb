@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters, status
 from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -7,11 +8,12 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from api_yamdb.settings import ADMIN_EMAIL
 from .serializers import (NotAdminSerializer,  UserSerializer,
-                          SignupSerializer)
+                          SignupSerializer, TokenSerializer)
 from .permissions import AdminOnly
 
 
@@ -46,6 +48,20 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def token(request):
+    serializer = TokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
+    user = get_object_or_404(User, username=username)
+    token = serializer.data['confirmation_code']
+    if not default_token_generator.check_token(user, token):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    token = RefreshToken.for_user(user)
+    return Response(token.refresh.access_token, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
