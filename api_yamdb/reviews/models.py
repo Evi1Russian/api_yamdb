@@ -30,7 +30,6 @@ class User(AbstractUser):
         default='user',
         verbose_name='Роль'
     )
-<<<<<<< HEAD
     bio = models.TextField(
         blank=True,
         verbose_name='Биография'
@@ -45,8 +44,6 @@ class User(AbstractUser):
         max_length=150,
         blank=True
     )
-=======
->>>>>>> 66c111de0485778aa64195c14a7e6a5a7080aaff
 
     @property
     def is_user(self):
@@ -66,8 +63,6 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
-<<<<<<< HEAD
-=======
 
 
 class Category(models.Model):
@@ -100,4 +95,3 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
->>>>>>> 66c111de0485778aa64195c14a7e6a5a7080aaff
