@@ -30,6 +30,7 @@ class User(AbstractUser):
         default='user',
         verbose_name='Роль'
     )
+<<<<<<< HEAD
     bio = models.TextField(
         blank=True,
         verbose_name='Биография'
@@ -44,6 +45,8 @@ class User(AbstractUser):
         max_length=150,
         blank=True
     )
+=======
+>>>>>>> 66c111de0485778aa64195c14a7e6a5a7080aaff
 
     @property
     def is_user(self):
@@ -63,3 +66,38 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
+<<<<<<< HEAD
+=======
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class Title(models.Model):
+    name = models.CharField(max_length=256)
+    year = models.IntegerField()
+    rating = models.IntegerField()
+    description = models.TextField()
+    genre = models.ManyToManyField(Genre, related_name='titles')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='titles')
+
+    def __str__(self):
+        return self.name
+>>>>>>> 66c111de0485778aa64195c14a7e6a5a7080aaff
