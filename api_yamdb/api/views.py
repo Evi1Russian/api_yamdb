@@ -53,6 +53,9 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def token(request):
+    """
+    Send accesstoken.
+    """
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
@@ -67,6 +70,9 @@ def token(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
+    """
+    Send confirmation code.
+    """
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
@@ -77,7 +83,7 @@ def signup(request):
 
 def send_confirmation(user):
     """
-    Send confirmation code.
+    Confirmation mail.
     """
     confirmation_code = default_token_generator.make_token(user)
     subject = 'Код подтверждения '
