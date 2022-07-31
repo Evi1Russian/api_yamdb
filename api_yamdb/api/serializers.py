@@ -1,10 +1,8 @@
-from rest_framework import serializers
-
-from reviews.models import User
+from rest_framework import serializers, validators
+#from django.db.models import Avg
 import datetime as dt
 
-
-from reviews.models import Category, Genre, Title
+from reviews.models import User, Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,6 +22,9 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(many=True, )
+    """rating = serializers.IntegerField(
+        Title.objects.annotate(rating=Avg('reviews__score'))
+    )"""
 
     class Meta:
         fields = '__all__'
@@ -46,6 +47,7 @@ class TitleSerializer(serializers.ModelSerializer):
                 genre = Genre.objects.get_or_create(
                     **genre)
             return title
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -87,4 +89,42 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+    )
+    title = serializers.PrimaryKeyRelatedField(
+        read_only=True
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+        validators = (
+            validators.UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('author', 'title'),
+                message=('Можно оставить только один отзыв.')
+            ),
+        )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+    )
+    review = serializers.PrimaryKeyRelatedField(
+        read_only=True
+    )
+
+    class Meta:
+
+        fields = '__all__'
+        model = Comment
 
