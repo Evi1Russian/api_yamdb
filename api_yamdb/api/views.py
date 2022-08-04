@@ -110,29 +110,17 @@ class CategoryViewSet(ListDestroyCreateViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
     lookup_field = 'slug'
-
-    # def destroy(self, serializer, pk=None):
-    #    queryset = get_object_or_404(Category,
-    #                                 slug=self.kwargs.get('category_slug'))
-    #    serializer.delete(queryset)
-
-    # @action(methods=['delete', ], detail=False, url_path='<slug:slug>')
-    # def delete_categoty(self, request):
-    #    queryset = get_object_or_404(Category,
-    #                                 slug=self.kwargs.get('category_slug'))
-    #    serializer = self.get_serializer(queryset, many=True)
-    #    return Response(serializer.data)
 
 
 class GenreViewSet(ListDestroyCreateViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -148,7 +136,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     filterset_fields = ('name', 'year')
     filter_class = TitleFilter

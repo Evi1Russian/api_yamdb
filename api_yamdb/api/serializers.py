@@ -46,17 +46,17 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год!')
         return value
 
-    def create(self, validated_data):
-        if 'genre' not in self.initial_data:
-            title = Title.objects.create(**validated_data)
-            return title
-        else:
-            genres = validated_data.pop('genre')
-            title = Title.objects.create(**validated_data)
-            for genre in genres:
-                genre = Genre.objects.get_or_create(
-                    **genre)
-            return title
+    # def create(self, validated_data):
+    #    if 'genre' not in self.initial_data:
+    #        title = Title.objects.create(**validated_data)
+    #        return title
+    #    else:
+    #        genres = validated_data.pop('genre')
+    #        title = Title.objects.create(**validated_data)
+    #        for genre in genres:
+    #            genre = Genre.objects.get_or_create(
+    #                **genre)
+    #        return title
 
 
 class UserSerializer(serializers.ModelSerializer):
