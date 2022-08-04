@@ -10,20 +10,31 @@ from reviews.models import Category, Genre, Title
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
 
-    genre = GenreSerializer(many=True, )
+    # category = CategorySerializer()
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+
+    )
+    # genre = GenreSerializer(many=True, )
 
     class Meta:
         fields = '__all__'
@@ -46,6 +57,7 @@ class TitleSerializer(serializers.ModelSerializer):
                 genre = Genre.objects.get_or_create(
                     **genre)
             return title
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -87,4 +99,3 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
-
