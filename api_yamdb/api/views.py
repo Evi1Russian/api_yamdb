@@ -11,7 +11,6 @@ from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 # from rest_framework import permissions
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters.rest_framework import FilterSet
 from rest_framework import mixins
 
 
@@ -19,8 +18,9 @@ from api_yamdb.settings import ADMIN_EMAIL
 from .serializers import (NotAdminSerializer, UserSerializer,
                           SignupSerializer, TokenSerializer,
                           CategorySerializer, GenreSerializer,
-                          TitleSerializer)
+                          TitleSerializer, ReadTitleSerializer)
 from .permissions import AdminOnly, IsAdminOrReadOnly
+from .filters import TitleFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -72,7 +72,7 @@ def token(request):
     token = RefreshToken.for_user(user)
     return Response(
         {'token': str(token.access_token)}, status=status.HTTP_200_OK
-        )
+    )
 
 
 @api_view(['POST'])
@@ -128,17 +128,15 @@ class GenreViewSet(ListDestroyCreateViewSet):
     lookup_field = 'slug'
 
 
-class TitleFilter(FilterSet):
-    class Meta:
-        model = Title
-        fields = ['genre__slug', 'category__slug']
-
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    filterset_fields = ('name', 'year')
-    filter_class = TitleFilter
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return ReadTitleSerializer
+        return TitleSerializer

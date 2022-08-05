@@ -23,7 +23,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
 
-    # category = CategorySerializer()
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
@@ -34,7 +33,6 @@ class TitleSerializer(serializers.ModelSerializer):
         many=True
 
     )
-    # genre = GenreSerializer(many=True, )
 
     class Meta:
         fields = '__all__'
@@ -46,17 +44,14 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год!')
         return value
 
-    # def create(self, validated_data):
-    #    if 'genre' not in self.initial_data:
-    #        title = Title.objects.create(**validated_data)
-    #        return title
-    #    else:
-    #        genres = validated_data.pop('genre')
-    #        title = Title.objects.create(**validated_data)
-    #        for genre in genres:
-    #            genre = Genre.objects.get_or_create(
-    #                **genre)
-    #        return title
+
+class ReadTitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
 
 
 class UserSerializer(serializers.ModelSerializer):
