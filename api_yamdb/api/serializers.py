@@ -1,30 +1,39 @@
-from rest_framework import serializers, validators
-#from django.db.models import Avg
+from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 import datetime as dt
 
-from reviews.models import User, Category, Genre, Title, Review, Comment
+from reviews.models import (User,
+                            Category, Genre, Title,
+                            Review, Comment
+                            )
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
 
-    genre = GenreSerializer(many=True, )
-    """rating = serializers.IntegerField(
-        Title.objects.annotate(rating=Avg('reviews__score'))
-    )"""
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+
+    )
 
     class Meta:
         fields = '__all__'
@@ -36,17 +45,14 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год!')
         return value
 
-    def create(self, validated_data):
-        if 'genre' not in self.initial_data:
-            title = Title.objects.create(**validated_data)
-            return title
-        else:
-            genres = validated_data.pop('genre')
-            title = Title.objects.create(**validated_data)
-            for genre in genres:
-                genre = Genre.objects.get_or_create(
-                    **genre)
-            return title
+
+class ReadTitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -92,39 +98,31 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault(),
-    )
-    title = serializers.PrimaryKeyRelatedField(
-        read_only=True
-    )
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username'
+                                          )
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
-        validators = (
-            validators.UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title'),
-                message=('Можно оставить только один отзыв.')
-            ),
-        )
+
+    def validate(self, data):
+        request = self.context['request']
+        author = request.user
+        title_pk = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_pk)
+        if request.method == 'POST' and Review.objects.filter(author=author, title=title).exists():
+            raise serializers.ValidationError('Отзыв уже есть!')
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault(),
-    )
-    review = serializers.PrimaryKeyRelatedField(
-        read_only=True
-    )
+    author = serializers.SlugRelatedField(read_only=True,
+                                          slug_field='username'
+                                          )
 
     class Meta:
 
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comment
 
