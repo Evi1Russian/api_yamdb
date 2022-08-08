@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 ROLE_CHOICES = (
@@ -95,3 +96,55 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    author = models.ForeignKey(User,
+                               verbose_name='Автор',
+                               related_name='reviews',
+                               on_delete=models.CASCADE,
+                               )
+    title = models.ForeignKey(Title,
+                              verbose_name='Произведение',
+                              related_name='reviews',
+                              on_delete=models.CASCADE,
+                              )
+    text = models.TextField(verbose_name='Текст')
+    score = models.IntegerField(verbose_name='Оценка',
+                                validators=[
+                                    MinValueValidator(1),
+                                    MaxValueValidator(10)
+                                ])
+    pub_date = models.DateTimeField(verbose_name='Дата публикации',
+                                    auto_now_add=True,
+                                    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review'),
+        ]
+
+    def __str__(self):
+        return self.text
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(Review,
+                               verbose_name='Отзыв',
+                               related_name='comments',
+                               on_delete=models.CASCADE,
+                               )
+    author = models.ForeignKey(User,
+                               verbose_name='Автор комментария',
+                               related_name='comments',
+                               on_delete=models.CASCADE,
+                               )
+    text = models.TextField(verbose_name='Текст комментария')
+    pub_date = models.DateTimeField(verbose_name='Время комментария',
+                                    auto_now_add=True,
+                                    )
+
+    def __str__(self):
+        return self.text
