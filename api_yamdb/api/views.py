@@ -164,8 +164,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
                                  ).exists():
             raise ParseError
         serializer.save(author=self.request.user, title=title)
-        title_rating = Review.objects.filter(title=title)\
-            .aggregate(Avg('score'))
+        title_rating = (Review.objects.filter(title=title)
+                        .aggregate(Avg('score')))
         title.rating = title_rating['score__avg']
         title.save(update_fields=["rating"])
 
