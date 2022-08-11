@@ -3,14 +3,15 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-ROLE_CHOICES = (
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-)
-
-
 class User(AbstractUser):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    ROLE_CHOICES = [
+        (ADMIN, 'Administrator'),
+        (MODERATOR, 'Moderator'),
+        (USER, 'User'),
+    ]
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -48,15 +49,18 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == 'user'
+        return self.role == self.USER
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return (self.role == self.ADMIN
+                or self.is_superuser)
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return (self.role == self.MODERATOR
+                or self.is_staff
+                or self.is_admin)
 
     class Meta:
         verbose_name = 'Пользователь'
