@@ -136,7 +136,7 @@ class GenreViewSet(ListDestroyCreateViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly, )
@@ -164,17 +164,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
                                  ).exists():
             raise ParseError
         serializer.save(author=self.request.user, title=title)
-        title_rating = (Review.objects.filter(title=title)
-                        .aggregate(Avg('score')))
-        title.rating = title_rating['score__avg']
-        title.save(update_fields=["rating"])
-
-    def perform_update(self, serializer):
-        serializer.save()
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        int_rating = Review.objects.filter(title=title).aggregate(Avg('score'))
-        title.rating = int_rating['score__avg']
-        title.save(update_fields=["rating"])
 
 
 class CommentViewSet(viewsets.ModelViewSet):
